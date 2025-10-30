@@ -4,18 +4,19 @@ import fs from 'fs/promises'
 import path from 'path'
 import { NextRequest, NextResponse } from 'next/server'
 
-// ✅ GET /api/products/[id]?id=123
-export async function GET(req: NextRequest) {
+export async function GET(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
-    const { searchParams } = new URL(req.url)
-    const idParam = searchParams.get('id')
-    const id = Number(idParam)
+    const { id } = await params
+    const productId = Number(id)
 
-    if (isNaN(id)) {
+    if (isNaN(productId)) {
       return NextResponse.json({ error: 'Invalid product ID' }, { status: 400 })
     }
 
-    const product = await prisma.product.findUnique({ where: { id } })
+    const product = await prisma.product.findUnique({ where: { id: productId } })
 
     if (!product) {
       return NextResponse.json({ error: 'Product not found' }, { status: 404 })
